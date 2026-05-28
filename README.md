@@ -1,3 +1,5 @@
+https://github.com/me1ax/weblarek.git
+
 # Проектная работа "Веб-ларек"
 
 Стек: HTML, SCSS, TS, Vite
