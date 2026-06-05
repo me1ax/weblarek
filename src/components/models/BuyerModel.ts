@@ -1,4 +1,5 @@
 import { IBuyer, TPayment, TValidationErrors } from '../../types/index';
+import { EventEmitter } from '../base/events';
 
 export class BuyerModel {
     private _payment: TPayment = '';
@@ -6,11 +7,32 @@ export class BuyerModel {
     private _email: string = '';
     private _phone: string = '';
 
+    constructor(private events: EventEmitter) {}
+
     setData(data: Partial<IBuyer>): void {
-        if (data.payment !== undefined) this._payment = data.payment;
-        if (data.address !== undefined) this._address = data.address;
-        if (data.email !== undefined) this._email = data.email;
-        if (data.phone !== undefined) this._phone = data.phone;
+        let changed = false;
+        
+        if (data.payment !== undefined && this._payment !== data.payment) {
+            this._payment = data.payment;
+            changed = true;
+        }
+        if (data.address !== undefined && this._address !== data.address) {
+            this._address = data.address;
+            changed = true;
+        }
+        if (data.email !== undefined && this._email !== data.email) {
+            this._email = data.email;
+            changed = true;
+        }
+        if (data.phone !== undefined && this._phone !== data.phone) {
+            this._phone = data.phone;
+            changed = true;
+        }
+        
+        if (changed) {
+            this.events.emit('buyer:changed', this.getData());
+            this.events.emit('buyer:validated', this.validate());
+        }
     }
 
     getData(): IBuyer {
@@ -27,6 +49,8 @@ export class BuyerModel {
         this._address = '';
         this._email = '';
         this._phone = '';
+        this.events.emit('buyer:changed', this.getData());
+        this.events.emit('buyer:validated', this.validate());
     }
 
     validate(): TValidationErrors<IBuyer> {
