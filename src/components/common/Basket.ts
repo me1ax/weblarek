@@ -1,6 +1,7 @@
-// src/components/Basket.ts
+// src/components/view/Basket.ts
 import { Component } from '../base/Component';
-export class Basket extends Component<{ items: HTMLElement[]; total: number }> {
+
+export class Basket extends Component<object> {
     protected _items: HTMLElement | null;
     protected _totalPrice: HTMLElement | null;
     protected _button: HTMLButtonElement | null;
@@ -17,21 +18,29 @@ export class Basket extends Component<{ items: HTMLElement[]; total: number }> {
         }
     }
 
+    protected setText(element: HTMLElement | null, value: unknown) {
+        if (element) {
+            element.textContent = String(value);
+        }
+    }
+
     set items(items: HTMLElement[]) {
         if (this._items) {
             if (items.length === 0) {
-                this._items.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
-                if (this._button) this._button.disabled = true;
+                this._items.innerHTML = '';
             } else {
                 this._items.replaceChildren(...items);
-                if (this._button) this._button.disabled = false;
             }
         }
     }
 
-    set total(value: number) {
-        if (this._totalPrice) {
-            this._totalPrice.textContent = `${value} синапсов`;
+    set buttonState(enabled: boolean) {
+        if (this._button) {
+            this._button.disabled = !enabled;
         }
+    }
+
+    set total(value: number) {
+        this.setText(this._totalPrice, `${value} синапсов`);
     }
 }

@@ -1,5 +1,5 @@
 // src/components/Success.ts
-import { Component } from './components/base/Component';
+import { Component } from '../base/Component';
 
 export interface ISuccessData {
     total: number;

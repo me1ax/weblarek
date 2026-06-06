@@ -1,5 +1,5 @@
 // src/components/Page.ts
-import { Component } from './components/base/Component';
+import { Component } from '../base/Component';
 
 export class Page extends Component<{ counter: number; catalog: HTMLElement[] }> {
     protected _counter: HTMLElement | null;

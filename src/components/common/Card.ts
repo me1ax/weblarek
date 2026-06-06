@@ -1,20 +1,14 @@
 // src/components/common/Card.ts
 import { Component } from '../base/Component';
-import { IProduct } from '../../types/index';
 
-export interface ICardActions {
-    onClick?: (event: MouseEvent) => void;
-}
-
-export class Card<T extends IProduct> extends Component<T> {
-    protected _id: string = '';
+export class Card extends Component<object> {
     protected _title: HTMLElement | null = null;
     protected _price: HTMLElement | null = null;
     protected _image: HTMLImageElement | null = null;
     protected _category: HTMLElement | null = null;
     protected _button: HTMLButtonElement | null = null;
 
-    constructor(container: HTMLElement, actions?: ICardActions) {
+    constructor(container: HTMLElement) {
         super(container);
         
         this._title = container.querySelector('.card__title');
@@ -22,22 +16,21 @@ export class Card<T extends IProduct> extends Component<T> {
         this._image = container.querySelector('.card__image');
         this._category = container.querySelector('.card__category');
         this._button = container.querySelector('.card__button');
-        
-        if (actions?.onClick) {
-            if (this._button) {
-                this._button.addEventListener('click', actions.onClick);
-            } else {
-                container.addEventListener('click', actions.onClick);
-            }
+    }
+
+    protected setText(element: HTMLElement | null, value: unknown) {
+        if (element) {
+            element.textContent = String(value);
         }
     }
 
-    set id(value: string) {
-        this._id = value;
-    }
-
-    get id(): string {
-        return this._id;
+    protected setImage(element: HTMLImageElement | null, src: string, alt?: string) {
+        if (element) {
+            element.src = src;
+            if (alt) {
+                element.alt = alt;
+            }
+        }
     }
 
     set title(value: string) {
@@ -77,6 +70,12 @@ export class Card<T extends IProduct> extends Component<T> {
     set buttonText(value: string) {
         if (this._button) {
             this._button.textContent = value;
+        }
+    }
+
+    set buttonDisabled(value: boolean) {
+        if (this._button) {
+            this._button.disabled = value;
         }
     }
 }

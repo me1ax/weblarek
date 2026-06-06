@@ -31,7 +31,6 @@ export class BuyerModel {
         
         if (changed) {
             this.events.emit('buyer:changed', this.getData());
-            this.events.emit('buyer:validated', this.validate());
         }
     }
 
@@ -50,7 +49,6 @@ export class BuyerModel {
         this._email = '';
         this._phone = '';
         this.events.emit('buyer:changed', this.getData());
-        this.events.emit('buyer:validated', this.validate());
     }
 
     validate(): TValidationErrors<IBuyer> {

@@ -1,18 +1,13 @@
-// src/components/CardBasket.ts
-import { Component } from './components/base/Component';
-import { IProduct } from './types/index';
+// src/components/view/CardBasket.ts
+import { Component } from '../base/Component';
 
-export interface IBasketCardActions {
-    onRemove?: (event: MouseEvent) => void;
-}
-
-export class CardBasket extends Component<IProduct> {
+export class CardBasket extends Component<object> {
     protected _index: HTMLElement | null;
     protected _title: HTMLElement | null;
     protected _price: HTMLElement | null;
     protected _button: HTMLButtonElement | null;
 
-    constructor(container: HTMLElement, actions?: IBasketCardActions) {
+    constructor(container: HTMLElement, onRemove: () => void) {
         super(container);
         
         this._index = container.querySelector('.basket__item-index');
@@ -20,8 +15,14 @@ export class CardBasket extends Component<IProduct> {
         this._price = container.querySelector('.card__price');
         this._button = container.querySelector('.basket__item-delete');
         
-        if (actions?.onRemove && this._button) {
-            this._button.addEventListener('click', actions.onRemove);
+        if (this._button) {
+            this._button.addEventListener('click', onRemove);
+        }
+    }
+
+    protected setText(element: HTMLElement | null, value: unknown) {
+        if (element) {
+            element.textContent = String(value);
         }
     }
 
