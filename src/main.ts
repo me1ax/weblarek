@@ -145,11 +145,9 @@ events.on('preview:toggle', () => {
     modal.close();
 });
 
-// 5. Удаление товара из корзины (из карточки) - больше не нужно, заменено на preview:toggle
-// оставлен для совместимости, но не используется
-events.on('card:remove', (data: { id: string }) => {
+// 5. Удаление товара из корзины (из списка)
+events.on('basket:remove', (data: { id: string }) => {
     cartModel.removeItem(data.id);
-    modal.close();
 });
 
 // 6. Обработка изменения корзины
@@ -180,18 +178,13 @@ events.on('cart:changed', () => {
     basket.total = total;
 });
 
-// 7. Удаление товара из корзины (из списка)
-events.on('basket:remove', (data: { id: string }) => {
-    cartModel.removeItem(data.id);
-});
-
-// 8. Открытие корзины
+// 7. Открытие корзины
 events.on('basket:open', () => {
     modal.content = basket.render();
     modal.open();
 });
 
-// 9. Обработчики событий форм
+// 8. Обработчики событий форм
 events.on('order:payment', (data: { payment: TPayment }) => {
     buyerModel.setData({ payment: data.payment });
 });
@@ -208,11 +201,12 @@ events.on('contacts:phone', (data: { phone: string }) => {
     buyerModel.setData({ phone: data.phone });
 });
 
-// 10. Открытие формы заказа
+// 9. Открытие формы заказа
 events.on('order:open', () => {
     const buyerData = buyerModel.getData();
     const errors = buyerModel.validate();
-    const isValid = Object.keys(errors).length === 0;
+    // Валидация только для полей первой формы (address и payment)
+    const isValid = buyerData.address.trim() !== '' && buyerData.payment !== '';
     
     orderForm.address = buyerData.address;
     if (buyerData.payment) {
@@ -225,55 +219,54 @@ events.on('order:open', () => {
     modal.open();
 });
 
-// 11. Переход к форме контактов
+// 10. Переход к форме контактов
 events.on('order:next', () => {
     const buyerData = buyerModel.getData();
-    const errors = buyerModel.validate();
-    const isValid = Object.keys(errors).length === 0;
+    // Проверяем только поля первой формы
+    const isValid = buyerData.address.trim() !== '' && buyerData.payment !== '';
     
-    if (isValid && buyerData.address && buyerData.payment) {
-        events.emit('order:open-contacts');
+    if (isValid) {
+        // Открываем форму контактов
+        const errors = buyerModel.validate();
+        const contactsIsValid = buyerData.email.trim() !== '' && buyerData.phone.trim() !== '';
+        
+        contactsForm.email = buyerData.email;
+        contactsForm.phone = buyerData.phone;
+        contactsForm.valid = contactsIsValid;
+        contactsForm.errors = errors.email || errors.phone || '';
+        
+        modal.content = contactsForm.render();
     }
 });
 
-events.on('order:open-contacts', () => {
-    const buyerData = buyerModel.getData();
-    const errors = buyerModel.validate();
-    const isValid = Object.keys(errors).length === 0;
-    
-    contactsForm.email = buyerData.email;
-    contactsForm.phone = buyerData.phone;
-    contactsForm.valid = isValid;
-    contactsForm.errors = errors.email || errors.phone || '';
-    
-    modal.content = contactsForm.render();
-});
-
-// 12. Отправка заказа
+// 11. Отправка заказа
 events.on('contacts:pay', () => {
     submitOrder();
 });
 
-// 13. Изменение данных покупателя
+// 12. Изменение данных покупателя
 events.on('buyer:changed', () => {
     const buyerData = buyerModel.getData();
     const errors = buyerModel.validate();
-    const isValid = Object.keys(errors).length === 0;
     
+    // Для формы заказа проверяем только address и payment
+    const orderIsValid = buyerData.address.trim() !== '' && buyerData.payment !== '';
     orderForm.address = buyerData.address;
     if (buyerData.payment) {
         orderForm.setPaymentActive(buyerData.payment);
     }
-    orderForm.valid = isValid;
+    orderForm.valid = orderIsValid;
     orderForm.errors = errors.address || errors.payment || '';
     
+    // Для формы контактов проверяем только email и phone
+    const contactsIsValid = buyerData.email.trim() !== '' && buyerData.phone.trim() !== '';
     contactsForm.email = buyerData.email;
     contactsForm.phone = buyerData.phone;
-    contactsForm.valid = isValid;
+    contactsForm.valid = contactsIsValid;
     contactsForm.errors = errors.email || errors.phone || '';
 });
 
-// 14. Отправка заказа на сервер
+// 13. Отправка заказа на сервер
 async function submitOrder() {
     const buyerData = buyerModel.getData();
     const items = cartModel.getItems();
@@ -300,7 +293,7 @@ async function submitOrder() {
     }
 }
 
-// 15. Закрытие модального окна
+// 14. Закрытие модального окна
 events.on('modal:close', () => {
     modal.close();
 });

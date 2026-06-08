@@ -1,4 +1,4 @@
-// src/components/view/Basket.ts
+// src/components/common/Basket.ts
 import { Component } from '../base/Component';
 
 export class Basket extends Component<object> {
@@ -13,14 +13,10 @@ export class Basket extends Component<object> {
         this._totalPrice = container.querySelector('.basket__price');
         this._button = container.querySelector('.basket__button');
         
+        // Сразу блокируем кнопку при создании
         if (this._button) {
+            this._button.disabled = true;
             this._button.addEventListener('click', onCheckout);
-        }
-    }
-
-    protected setText(element: HTMLElement | null, value: unknown) {
-        if (element) {
-            element.textContent = String(value);
         }
     }
 
@@ -41,6 +37,8 @@ export class Basket extends Component<object> {
     }
 
     set total(value: number) {
-        this.setText(this._totalPrice, `${value} синапсов`);
+        if (this._totalPrice) {
+            this._totalPrice.textContent = `${value} синапсов`;
+        }
     }
 }
